@@ -41,6 +41,13 @@ jobs:
           test -f extracted/ScreenOnCall/settings.gradle.kts
           test -f extracted/ScreenOnCall/app/build.gradle.kts
 
+      - name: Configure signaling server URL
+        run: |
+          APP="extracted/ScreenOnCall/app/src/main/java/com/screenoncall/MainActivity.kt"
+          grep -n "YOUR-SIGNALING-SERVER" "$APP"
+          sed -i 's#wss://YOUR-SIGNALING-SERVER.example/ws#wss://deep-space-voice-call.onrender.com/ws#g' "$APP"
+          grep -n "deep-space-voice-call.onrender.com/ws" "$APP"
+
       - name: Fix WebRTC dependency
         run: |
           APP="extracted/ScreenOnCall/app/build.gradle.kts"
