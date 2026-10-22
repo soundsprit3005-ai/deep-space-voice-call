@@ -4,7 +4,9 @@ name: Build Deep Space APK
 on:
   workflow_dispatch:
   push:
-    branches: [main, master]
+    branches:
+      - main
+      - master
 
 permissions:
   contents: read
@@ -12,36 +14,55 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Java
+      - name: Set up Java 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
 
-      - name: Setup Gradle
+      - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.9"
 
-      - name: Extract source ZIP
+      - name: Verify source ZIP
+        run: |
+          test -f Deep_Space_Voice_Call_Source.zip
+          unzip -t Deep_Space_Voice_Call_Source.zip
+
+      - name: Extract Android source
         run: |
           unzip -q Deep_Space_Voice_Call_Source.zip -d extracted
           test -f extracted/ScreenOnCall/settings.gradle.kts
+          test -f extracted/ScreenOnCall/app/build.gradle.kts
 
-      - name: Build APK
+      - name: Fix WebRTC dependency
+        run: |
+          APP="extracted/ScreenOnCall/app/build.gradle.kts"
+          sed -i 's#org.webrtc:google-webrtc:1.0.32006#io.github.webrtc-sdk:android:150.7871.01#' "$APP"
+          grep -nE 'webrtc|dependencies' "$APP"
+
+      - name: Build debug APK
         run: |
           gradle --no-daemon \
             -p extracted/ScreenOnCall \
             assembleDebug
 
-      - name: Upload APK
+      - name: Verify APK
+        run: |
+          APK="extracted/ScreenOnCall/app/build/outputs/apk/debug/app-debug.apk"
+          test -s "$APK"
+          ls -lh "$APK"
+
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: DEEP-SPACE-APK
-          path: extracted/ScreenOnCall/app/build/outputs/apk/debug/*.apk
+          path: extracted/ScreenOnCall/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           
