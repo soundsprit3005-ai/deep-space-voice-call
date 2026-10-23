@@ -1,3 +1,4 @@
+
 name: Build Deep Space APK
 
 on:
@@ -31,13 +32,13 @@ jobs:
 
       - name: Verify source ZIP
         run: |
-          ZIP="Deep_Space_Voice_Call_Source_Diagnostic_v3.zip"
+          ZIP="Deep_Space_Voice_Call_Source_Diagnostic_v4.zip"
           test -f "$ZIP"
           unzip -t "$ZIP"
 
       - name: Extract Android source
         run: |
-          unzip -q Deep_Space_Voice_Call_Source_Diagnostic_v3.zip -d extracted
+          unzip -q Deep_Space_Voice_Call_Source_Diagnostic_v4.zip -d extracted
           test -f extracted/ScreenOnCall/settings.gradle.kts
           test -f extracted/ScreenOnCall/app/build.gradle.kts
           test -f extracted/ScreenOnCall/app/src/main/java/com/screenoncall/MainActivity.kt
@@ -70,3 +71,4 @@ jobs:
           name: DEEP-SPACE-APK-DIAGNOSTIC
           path: extracted/ScreenOnCall/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
+          
